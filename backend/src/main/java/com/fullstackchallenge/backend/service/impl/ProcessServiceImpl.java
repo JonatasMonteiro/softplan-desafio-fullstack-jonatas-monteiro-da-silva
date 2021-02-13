@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 public class ProcessServiceImpl implements ProcessService {
     // Como não há acesso a banco de dados, os processos são armazenados em uma lista estática
     private List<Process> processList = new ArrayList<>(Arrays.asList(
-            new Process(1,"title","description",new ArrayList<Long>(
-                    Arrays.asList(new Long(4)))),
-            new Process(2,"second_title","other description",new ArrayList<Long>(
-                    Arrays.asList(new Long(4))))));
+            new Process(1,"title","description",new ArrayList<String>(
+                    Arrays.asList("finalizador"))),
+            new Process(2,"second_title","other description",new ArrayList<String>(
+                    Arrays.asList("finalizador")))));
 
 
     // Metodo que corresponde a criação de um processo
@@ -45,24 +45,24 @@ public class ProcessServiceImpl implements ProcessService {
 
     // Método onde se é incluido um usuário a dar um parecer em um processo
     @Override
-    public void includeUserToOpinate(long processId,long userId){
+    public void includeUserToOpinate(long processId,String username){
         Process processFromId = processList.stream().filter(process -> process.getId() == processId).findFirst().get();
-        processFromId.getUsersToOpinate().add(userId);
+        processFromId.getUsersToOpinate().add(username);
 
     }
 
     // Metodo que retorna todos os processos a dar parecer de um determinado usuário
     @Override
-    public List<Process> getProcessToOpinateFromUser(long userId){
-        return processList.stream().filter(process -> process.getUsersToOpinate().contains(userId)).collect(Collectors.toList());
+    public List<Process> getProcessToOpinateFromUser(String username){
+        return processList.stream().filter(process -> process.getUsersToOpinate().contains(username)).collect(Collectors.toList());
     }
 
     // Metodo onde o usuário realiza um parecer em um determinado processo
     @Override
-    public void opinate(long processId,long userId,String opinion){
+    public void opinate(long processId,String username,String opinion){
         Process process = findById(processId);
-        process.getOpinions().put(userId,opinion);
-        process.getUsersToOpinate().removeIf(usrId -> usrId == userId);
+        process.getOpinions().put(username,opinion);
+        process.getUsersToOpinate().removeIf(usrname -> usrname == username);
     }
 
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fullstackchallenge.backend.config.TokenProvider;
 import com.fullstackchallenge.backend.exception.DuplicateUsernameException;
+import com.fullstackchallenge.backend.model.AuthToken;
 import com.fullstackchallenge.backend.model.Process;
 import com.fullstackchallenge.backend.service.UserService;
 import org.junit.Before;
@@ -41,9 +42,9 @@ public class ProcessControllerTest {
     @Autowired
     private TokenProvider jwtTokenUtil;
 
-    private String tokenTriador;
+    private AuthToken tokenTriador;
 
-    private String tokenFinalizador;
+    private AuthToken tokenFinalizador;
 
     private Authentication authenticationTriador;
 
@@ -81,7 +82,7 @@ public class ProcessControllerTest {
         tokenTriador = jwtTokenUtil.generateToken(authenticationTriador);
         MvcResult result = mockMvc.perform(get("/processes/list")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization","Bearer "+tokenTriador))
+                .header("Authorization","Bearer "+tokenTriador.getToken()))
                 .andExpect(status().isOk())
                 .andReturn();
         String resultAsString = result.getResponse().getContentAsString();
@@ -91,12 +92,26 @@ public class ProcessControllerTest {
     }
 
     @Test
+    public void testListAllUsersFinalizadores() throws Exception{
+        SecurityContextHolder.getContext().setAuthentication(authenticationTriador);
+        tokenTriador = jwtTokenUtil.generateToken(authenticationTriador);
+        MvcResult result = mockMvc.perform(get("/processes/listUsersFinalizador")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization","Bearer "+tokenTriador.getToken()))
+                .andExpect(status().isOk())
+                .andReturn();
+        String resultAsString = result.getResponse().getContentAsString();
+        assertTrue(resultAsString.contains("FINALIZADOR"));
+
+    }
+
+    @Test
     public void testGetProcess() throws Exception{
         SecurityContextHolder.getContext().setAuthentication(authenticationTriador);
         tokenTriador = jwtTokenUtil.generateToken(authenticationTriador);
         MvcResult result = mockMvc.perform(get("/processes/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization","Bearer "+tokenTriador))
+                .header("Authorization","Bearer "+tokenTriador.getToken()))
                 .andExpect(status().isOk())
                 .andReturn();
         String resultAsString = result.getResponse().getContentAsString();
@@ -112,7 +127,7 @@ public class ProcessControllerTest {
         MvcResult result = mockMvc.perform(post("/processes/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson)
-                .header("Authorization","Bearer "+tokenTriador))
+                .header("Authorization","Bearer "+tokenTriador.getToken()))
                 .andExpect(status().isOk())
                 .andReturn();
         String resultAsString = result.getResponse().getContentAsString();
@@ -123,22 +138,22 @@ public class ProcessControllerTest {
     public void testInsertUserToOpinate() throws Exception{
         SecurityContextHolder.getContext().setAuthentication(authenticationTriador);
         tokenTriador = jwtTokenUtil.generateToken(authenticationTriador);
-        MvcResult result = mockMvc.perform(put("/processes/2/3")
+        MvcResult result = mockMvc.perform(put("/processes/2/finalizador")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization","Bearer "+tokenTriador))
+                .header("Authorization","Bearer "+tokenTriador.getToken()))
                 .andExpect(status().isOk())
                 .andReturn();
         String resultAsString = result.getResponse().getContentAsString();
-        assertEquals(resultAsString,"User of id 3 included to opinate into process of id 2");
+        assertEquals(resultAsString,"User of username: finalizador included to opinate into process of id 2 - second_title");
     }
 
     @Test
     public void testGetProcessToOpinate() throws Exception{
         SecurityContextHolder.getContext().setAuthentication(authenticationFinalizador);
         tokenFinalizador = jwtTokenUtil.generateToken(authenticationFinalizador);
-        MvcResult result = mockMvc.perform(get("/processes/processToOpinate/4")
+        MvcResult result = mockMvc.perform(get("/processes/processToOpinate/finalizador")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization","Bearer "+tokenFinalizador))
+                .header("Authorization","Bearer "+tokenFinalizador.getToken()))
                 .andExpect(status().isOk())
                 .andReturn();
         String resultAsString = result.getResponse().getContentAsString();
@@ -150,13 +165,13 @@ public class ProcessControllerTest {
     public void testOpinate() throws Exception{
         SecurityContextHolder.getContext().setAuthentication(authenticationFinalizador);
         tokenFinalizador = jwtTokenUtil.generateToken(authenticationFinalizador);
-        MvcResult result = mockMvc.perform(post("/processes/1/4")
+        MvcResult result = mockMvc.perform(post("/processes/1/finalizador")
                 .contentType(MediaType.TEXT_PLAIN)
                 .content("Opinion test")
-                .header("Authorization","Bearer "+tokenFinalizador))
+                .header("Authorization","Bearer "+tokenFinalizador.getToken()))
                 .andExpect(status().isOk())
                 .andReturn();
         String resultAsString = result.getResponse().getContentAsString();
-        assertEquals(resultAsString,"User of id 4 opinated on process of id 1");
+        assertEquals(resultAsString,"User of username finalizador opinated on process of id 1 - title");
     }
 }

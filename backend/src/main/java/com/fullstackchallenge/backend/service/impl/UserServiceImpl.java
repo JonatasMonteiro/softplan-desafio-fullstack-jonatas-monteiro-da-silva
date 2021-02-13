@@ -60,6 +60,12 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userList;
     }
 
+    // Metodo que retorna todos os usuarios finalizadores
+    @Override
+    public List<User> findAllFinalizador(){
+        return userList.stream().filter(user -> user.getRole().getName().equals("FINALIZADOR")).collect(Collectors.toList());
+    }
+
     // Metodo que retorna um usuário pelo seu username
     @Override
     public User findByUsername(String username){

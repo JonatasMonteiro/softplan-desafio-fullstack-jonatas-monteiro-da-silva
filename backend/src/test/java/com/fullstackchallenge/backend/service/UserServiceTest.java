@@ -31,6 +31,12 @@ public class UserServiceTest {
     }
 
     @Test
+    public void testFindAllFinalizadores(){
+        List<User> userList = userService.findAllFinalizador();
+        assertThat(userList).isNotNull().isNotEmpty().allMatch(user -> user.getRole().getName().equals("FINALIZADOR"));
+    }
+
+    @Test
     public void testFindById(){
         User user = userService.findById(1);
         assertTrue(user.getId() == 1);

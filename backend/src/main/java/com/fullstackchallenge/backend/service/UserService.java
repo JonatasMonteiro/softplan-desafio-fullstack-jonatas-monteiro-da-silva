@@ -13,5 +13,6 @@ public interface UserService {
     List<User> findAll();
     User findById(long id );
     void update(User user) throws RoleChangeException;
+    List<User> findAllFinalizador();
     void delete(long id);
 }

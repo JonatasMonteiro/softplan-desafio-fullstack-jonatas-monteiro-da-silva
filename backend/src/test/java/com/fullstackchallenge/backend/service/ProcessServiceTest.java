@@ -41,22 +41,22 @@ public class ProcessServiceTest {
 
     @Test
     public void testIncludeUserToOpinate(){
-        processService.includeUserToOpinate(2,4);
+        processService.includeUserToOpinate(2,"finalizador");
         Process process = processService.findById(2);
-        assertTrue(process.getUsersToOpinate().contains(new Long(4)));
+        assertTrue(process.getUsersToOpinate().contains("finalizador"));
     }
 
     @Test
     public void testGetProcessToOpinateFromUser(){
-        List<Process> processes = processService.getProcessToOpinateFromUser(4);
-        assertTrue(processes.get(0).getUsersToOpinate().contains(new Long(4)));
+        List<Process> processes = processService.getProcessToOpinateFromUser("finalizador");
+        assertTrue(processes.get(0).getUsersToOpinate().contains("finalizador"));
     }
 
     @Test
     public void testOpinate(){
-        processService.opinate(1,3,"Opinion test");
+        processService.opinate(1,"finalizador","Opinion test");
         Process process = processService.findById(1);
-        assertEquals(process.getOpinions().get(new Long(3)),"Opinion test");
+        assertEquals(process.getOpinions().get("finalizador"),"Opinion test");
 
     }
 }

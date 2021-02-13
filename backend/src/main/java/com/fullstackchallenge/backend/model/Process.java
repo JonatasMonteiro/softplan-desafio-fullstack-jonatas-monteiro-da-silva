@@ -12,9 +12,9 @@ public class Process {
 
     private String description;
 
-    private List<Long> usersToOpinate;
+    private List<String> usersToOpinate;
 
-    private HashMap<Long,String> opinions;
+    private HashMap<String,String> opinions;
 
 
     public Process(String title,String description){
@@ -31,7 +31,7 @@ public class Process {
         this.usersToOpinate = new ArrayList<>();
         this.opinions = new HashMap<>();
     }
-    public Process(long id,String title,String description, List<Long> usersToOpinate){
+    public Process(long id,String title,String description, List<String> usersToOpinate){
         this.id = id;
         this.title = title;
         this.description = description;
@@ -40,19 +40,19 @@ public class Process {
     }
     public Process(){}
 
-    public HashMap<Long, String> getOpinions() {
+    public HashMap<String, String> getOpinions() {
         return opinions;
     }
 
-    public void setOpinions(HashMap<Long, String> opinions) {
+    public void setOpinions(HashMap<String, String> opinions) {
         this.opinions = opinions;
     }
 
-    public List<Long> getUsersToOpinate() {
+    public List<String> getUsersToOpinate() {
         return usersToOpinate;
     }
 
-    public void setUsersToOpinate(List<Long> usersToOpinate){
+    public void setUsersToOpinate(List<String> usersToOpinate){
         this.usersToOpinate = usersToOpinate;
     }
 

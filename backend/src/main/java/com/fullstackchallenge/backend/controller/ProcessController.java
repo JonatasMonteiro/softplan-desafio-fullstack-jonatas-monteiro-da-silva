@@ -24,10 +24,10 @@ public class ProcessController {
     private ProcessService processService;
 
     @Autowired
-    private TokenProvider jwtTokenUtil;
+    private UserService userService;
 
     @Autowired
-    private UserService userService;
+    private TokenProvider jwtTokenUtil;
 
     // Endpoint onde se é criado um processo.
     // Os dados do processo são enviados no corpo da requisição
@@ -43,18 +43,25 @@ public class ProcessController {
     // Se id do processo ou do usuario não corresponder a nenhum existente, retorna um BAD_REQUEST
     // Apenas usuários triadores tem acesso
     @PreAuthorize("hasRole('TRIADOR')")
-    @RequestMapping(value = "/{id}/{userId}",method = RequestMethod.PUT)
-    public ResponseEntity<?> insertUserToOpinate(@PathVariable("userId") long userId, @PathVariable("id") long processId){
+    @RequestMapping(value = "/{id}/{username}",method = RequestMethod.PUT)
+    public ResponseEntity<?> insertUserToOpinate(@PathVariable("username") String username, @PathVariable("id") long processId){
         Process process = processService.findById(processId);
         if(process == null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The process id matches no known process");
         }
-        User user = userService.findById(userId);
+        User user = userService.findByUsername(username);
         if(user == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The user id matches no known user");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The username matches no known user");
         }
-        processService.includeUserToOpinate(processId,userId);
-        return ResponseEntity.ok("User of id "+ userId + " included to opinate into process of id "+ processId);
+        processService.includeUserToOpinate(processId,username);
+        return ResponseEntity.ok("User of username: "+ username + " included to opinate into process of id "+ processId+ " - "+ process.getTitle());
+    }
+
+    // Endpoint onde se retornam todos os usuarios finalizadores para possível indicação a dar parecer
+    @PreAuthorize("hasRole('TRIADOR')")
+    @RequestMapping(value = "/listUsersFinalizador", method = RequestMethod.GET)
+    public ResponseEntity<?> getUsersFinalizador(){
+        return ResponseEntity.ok(userService.findAllFinalizador());
     }
 
     // Endpoint onde se listam todos os processos existentes
@@ -87,18 +94,18 @@ public class ProcessController {
     // Caso o usuario para o qual foi feita a requisição não corresponda ao usuário logado, retorna um erro FORBIDDEN
     // Apenas usuarios finalizadores tem acesso
     @PreAuthorize("hasRole('FINALIZADOR')")
-    @RequestMapping(value = "/processToOpinate/{userId}",method = RequestMethod.GET)
-    public ResponseEntity<?> getProcessToOpinate(@RequestHeader("Authorization") String token,@PathVariable("userId") long userId){
-        User user = userService.findById(userId);
+    @RequestMapping(value = "/processToOpinate/{username}",method = RequestMethod.GET)
+    public ResponseEntity<?> getProcessToOpinate(@RequestHeader("Authorization") String token,@PathVariable("username") String username){
+        User user = userService.findByUsername(username);
         token = token.substring(7);
-        String username = jwtTokenUtil.getUsernameFromToken(token);
+        String usrname = jwtTokenUtil.getUsernameFromToken(token);
         if(user == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The user id matches no known user");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The username matches no known user");
         }
-        if(!user.getUsername().equals(username)){
+        if(!username.equals(usrname)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no authorization to see this user processes");
         }
-            return ResponseEntity.ok(processService.getProcessToOpinateFromUser(userId));
+            return ResponseEntity.ok(processService.getProcessToOpinateFromUser(username));
 
     }
 
@@ -108,28 +115,28 @@ public class ProcessController {
     // Caso o usuario tente dar o parecer em um processo do qual ele não tenha sido requerido, retorna um erro FORBIDDEN
     // Apenas usuarios finalizadores tem acesso.
     @PreAuthorize("hasRole('FINALIZADOR')")
-    @RequestMapping(value = "/{id}/{userId}",method = RequestMethod.POST)
+    @RequestMapping(value = "/{id}/{username}",method = RequestMethod.POST)
     public ResponseEntity<?> opinate(@RequestHeader("Authorization") String token,
-                                     @RequestBody String opinion, @PathVariable("id") long processId, @PathVariable("userId") long userId){
+                                     @RequestBody String opinion, @PathVariable("id") long processId, @PathVariable("username") String username){
         token = token.substring(7);
-        String username = jwtTokenUtil.getUsernameFromToken(token);
+        String usrname = jwtTokenUtil.getUsernameFromToken(token);
         Process process = processService.findById(processId);
         if(process == null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The process id matches no known process");
         }
-        User user = userService.findById(userId);
+        User user = userService.findByUsername(username);
         if(user == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The user id matches no known user");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The username matches no known user");
         }
-        if(!user.getUsername().equals(username)){
+        if(!username.equals(usrname)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can't opinate as other user");
         }
-        List<Process> processesFromUser = processService.getProcessToOpinateFromUser(userId)
+        List<Process> processesFromUser = processService.getProcessToOpinateFromUser(username)
                 .stream().filter(processItem -> processItem.getId() == processId).collect(Collectors.toList());
         if(processesFromUser.isEmpty()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You're not selected to opinate on this process");
         }
-        processService.opinate(processId,userId,opinion);
-        return ResponseEntity.ok("User of id "+ userId + " opinated on process of id "+ processId);
+        processService.opinate(processId,username,opinion);
+        return ResponseEntity.ok("User of username "+ username + " opinated on process of id "+ processId + " - "+process.getTitle());
     }
 }

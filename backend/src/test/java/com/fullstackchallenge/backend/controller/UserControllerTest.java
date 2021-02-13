@@ -1,11 +1,13 @@
 package com.fullstackchallenge.backend.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fullstackchallenge.backend.config.TokenProvider;
 import com.fullstackchallenge.backend.exception.DuplicateUsernameException;
+import com.fullstackchallenge.backend.model.AuthToken;
 import com.fullstackchallenge.backend.model.LoginUser;
 import com.fullstackchallenge.backend.model.Role;
 import com.fullstackchallenge.backend.model.User;
@@ -57,7 +59,7 @@ public class UserControllerTest {
 
     private static UserService userService;
 
-    private String token;
+    private AuthToken token;
 
 
     private ObjectMapper mapper;
@@ -77,6 +79,7 @@ public class UserControllerTest {
         token = jwtTokenUtil.generateToken(authentication);
         mapper = new ObjectMapper();
         mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        mapper.disable(MapperFeature.USE_ANNOTATIONS);
         ow = mapper.writer().withDefaultPrettyPrinter();
     }
 
@@ -98,7 +101,7 @@ public class UserControllerTest {
     public void testList() throws Exception {
         MvcResult result = mockMvc.perform(get("/users/list")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization","Bearer "+token))
+                .header("Authorization","Bearer "+token.getToken()))
                 .andExpect(status().isOk())
                 .andReturn();
         String resultAsString = result.getResponse().getContentAsString();
@@ -109,7 +112,7 @@ public class UserControllerTest {
     public void testGetUser() throws  Exception{
         MvcResult result = mockMvc.perform(get("/users/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization","Bearer "+token))
+                .header("Authorization","Bearer "+token.getToken()))
                 .andExpect(status().isOk())
                 .andReturn();
         String resultAsString = result.getResponse().getContentAsString();
@@ -124,11 +127,11 @@ public class UserControllerTest {
         MvcResult result = mockMvc.perform(post("/users/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson)
-                .header("Authorization","Bearer "+token))
+                .header("Authorization","Bearer "+token.getToken()))
                 .andExpect(status().isOk())
                 .andReturn();
         String resultAsString = result.getResponse().getContentAsString();
-        assertTrue(resultAsString.contains("triador"));
+        assertEquals(resultAsString,"User of id 5 succesfully created");
     }
 
     @Test
@@ -139,7 +142,7 @@ public class UserControllerTest {
         MvcResult result = mockMvc.perform(put("/users/2")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson)
-                .header("Authorization","Bearer "+token))
+                .header("Authorization","Bearer "+token.getToken()))
                 .andExpect(status().isOk())
                 .andReturn();
         String resultAsString = result.getResponse().getContentAsString();

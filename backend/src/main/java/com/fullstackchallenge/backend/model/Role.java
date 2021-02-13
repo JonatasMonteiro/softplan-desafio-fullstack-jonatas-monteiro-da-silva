@@ -12,7 +12,6 @@ public class Role {
 
     private String description;
 
-    @JsonIgnore
     public long getId() {
         return id;
     }

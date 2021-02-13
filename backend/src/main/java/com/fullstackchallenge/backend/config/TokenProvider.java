@@ -1,5 +1,6 @@
 package com.fullstackchallenge.backend.config;
 
+import com.fullstackchallenge.backend.model.AuthToken;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -60,18 +61,18 @@ public class TokenProvider implements Serializable {
     }
 
     // Metodo principal desta classe, responsavel por gerar o token propriamente dito
-    public String generateToken(Authentication authentication) {
+    public AuthToken generateToken(Authentication authentication) {
          String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
-
-        return Jwts.builder()
+        AuthToken tokenObject = new AuthToken(Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim(AUTHORITIES_KEY, authorities)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY*1000))
                 .signWith(SignatureAlgorithm.HS256, SIGNING_KEY)
-                .compact();
+                .compact(), authentication.getAuthorities().stream().findFirst().get().getAuthority());
+        return tokenObject;
     }
 
     // Valida-se o token neste metodo

@@ -52,8 +52,9 @@ public class UserController {
                 )
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        final String token = jwtTokenUtil.generateToken(authentication);
-        return ResponseEntity.ok(new AuthToken(token));
+        final AuthToken token = jwtTokenUtil.generateToken(authentication);
+        token.setUsername(loginUser.getUsername());
+        return ResponseEntity.ok(token);
     }
 
     // Endpoint onde são listados todos os usuários. Apenas usuários com visão de administrador tem acesso a esse endpoint
@@ -130,7 +131,8 @@ public class UserController {
     @RequestMapping(value="/create", method = RequestMethod.POST)
     public ResponseEntity<?> saveUser(@RequestBody User user) {
         try {
-            return ResponseEntity.ok(userService.create(user));
+            User userCreated = userService.create(user);
+            return ResponseEntity.ok("User of id "+userCreated.getId()+ " succesfully created");
         } catch (DuplicateUsernameException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This username already exists: "+ user.getUsername());
         }

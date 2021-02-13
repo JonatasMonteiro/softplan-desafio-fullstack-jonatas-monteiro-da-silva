@@ -9,7 +9,7 @@ public interface ProcessService {
     Process create(Process process);
     Process findById(long id);
     List<Process> findAll();
-    void includeUserToOpinate(long processId,long userId);
-    List<Process> getProcessToOpinateFromUser(long userId);
-    void opinate(long processId,long userId,String opinion);
+    void includeUserToOpinate(long processId,String username);
+    List<Process> getProcessToOpinateFromUser(String username);
+    void opinate(long processId,String username,String opinion);
 }

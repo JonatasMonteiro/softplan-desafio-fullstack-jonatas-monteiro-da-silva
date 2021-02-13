@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 // Classe que modela um usuario
 public class User {
-    private static int idCount = 2;
+    private static int idCount = 4;
 
     public static void increaseIdCount(){
         idCount += 1;
@@ -20,6 +20,7 @@ public class User {
     private long id;
 
     private String username;
+
 
     private String password;
 
@@ -41,10 +42,12 @@ public class User {
         this.username = username;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
 
+    @JsonProperty
     public void setPassword(String password) {
         this.password = password;
     }
