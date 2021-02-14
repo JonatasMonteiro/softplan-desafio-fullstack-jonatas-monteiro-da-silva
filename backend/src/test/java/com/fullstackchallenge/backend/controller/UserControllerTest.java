@@ -131,7 +131,7 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String resultAsString = result.getResponse().getContentAsString();
-        assertEquals(resultAsString,"User of id 5 succesfully created");
+        assertEquals(resultAsString,"Usuario de id 5 criado com sucesso");
     }
 
     @Test
@@ -146,7 +146,7 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String resultAsString = result.getResponse().getContentAsString();
-        assertEquals(resultAsString,"User of id 2 was updated sucessfully");
+        assertEquals(resultAsString,"Usuario de id 2 atualizado com sucesso");
     }
 
     @Test
@@ -156,7 +156,7 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String resultAsString = result.getResponse().getContentAsString();
-        assertEquals(resultAsString,"User of id 2 was deleted sucessfully");
+        assertEquals(resultAsString,"Usuario de id 2 foi deletado com sucesso");
     }
 
 }

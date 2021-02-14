@@ -5,9 +5,10 @@ import Select from "react-validation/build/select"
 import CheckButton from "react-validation/build/button";
 
 
-
+import AuthService from "../services/auth.service"
 import UserService from "../services/user.service"
 
+// Método que valida se os campos foram preenchidos
 const required = value => {
     if (!value) {
       return (
@@ -18,7 +19,7 @@ const required = value => {
     }
   };
   
-  
+ // Método que valida o tamanho do username 
   const vusername = value => {
     if (value.length < 3 || value.length > 20) {
       return (
@@ -29,6 +30,7 @@ const required = value => {
     }
   };
   
+  // Método que valida o tamanho da senha
   const vpassword = value => {
     if (value.length < 6 || value.length > 40) {
       return (
@@ -39,8 +41,10 @@ const required = value => {
     }
   };
 
+  // Possíveis cargos
   const roles = [{id:0,name:"",description:""},{id:2,name:"TRIADOR",description:"Usuario Triador"},{id:3,name:"FINALIZADOR",description:"Usuario Finalizador"}]
 
+//Componente da criação de um usuário
 export default class CreateUser extends Component{
     constructor(props) {
         super(props);
@@ -59,32 +63,50 @@ export default class CreateUser extends Component{
         };
       }
       
+      // Método do ciclo de vida do componente, que executa o código contido quando o componente
+      // é montado
+      componentDidMount(){
+        const usr = AuthService.getCurrentUser()
+        if(usr){
+        const role = usr.role.substring(5).toLowerCase()
+        if(role !== "admin"){
+        this.props.history.push("/"+role)
+      }
+        }
+        else{
+        this.props.history.push("/login")
+    }
+      }
 
+      // Método que cuida da mudança do username
       onChangeUsername(e) {
         this.setState({
           username: e.target.value
         });
       }
 
+      // Método que cuida da mudança de cargo
       onChangeRole(e){
-          console.log(roles.filter(rolee => rolee.name === e.target.value).pop())
           this.setState({
               role:roles.filter(rolee => rolee.name === e.target.value).pop()
           })
       }
     
-    
+      // Método que cuida da mudança de senha
       onChangePassword(e) {
         this.setState({
           password: e.target.value
         });
       }
 
+      // Método que redireciona o usuario admin de volta para sua página após clickar no botão
+      // Voltar
       onClickReturn(e){
           e.preventDefault()
           this.props.history.push("/admin")
       }
     
+      // Método que cuida da submissão do formulário
       handleCreate(e) {
         e.preventDefault();
     
@@ -102,10 +124,13 @@ export default class CreateUser extends Component{
             this.state.role
           ).then(
             response => {
+              console.log(response);
               this.setState({
-                message: response.data.message,
+                message: response.data,
                 successful: true
               });
+              this.props.history.push({pathname:"/admin",state:{message:this.state.message}});
+              window.location.reload();
             },
             error => {
               const resMessage =
@@ -121,8 +146,7 @@ export default class CreateUser extends Component{
               });
             }
           );
-          this.props.history.push("/admin");
-          window.location.reload();
+          
         }
       }
 

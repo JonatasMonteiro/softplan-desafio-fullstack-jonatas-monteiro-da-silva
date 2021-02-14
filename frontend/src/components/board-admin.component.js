@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 
 import UserService from "../services/user.service";
+import AuthService from "../services/auth.service"
 
+// Componente da visão de admin que mostra todos os usuarios existentes em uma lista
 export default class BoardAdmin extends Component {
   constructor(props) {
     super(props);
@@ -16,7 +18,25 @@ export default class BoardAdmin extends Component {
     };
   }
 
+  
+  // Metodo do ciclo de vida de um componente responsavel por executar codigo antes do componente
+  // ser montado
   componentDidMount() {
+    const usr = AuthService.getCurrentUser()
+    if(usr){
+      const role = usr.role.substring(5).toLowerCase()
+      if(role !== "admin"){
+        this.props.history.push("/"+role)
+      }
+    }
+    else{
+      this.props.history.push("/login")
+    }
+    if(this.props.location.state){
+    this.setState({message:this.props.location.state.message})
+    console.log(this.state.message)
+    setTimeout(() => this.setState({message:null}),2000)
+  }
     UserService.getUserList().then(
       response => {
         this.setState({
@@ -36,10 +56,12 @@ export default class BoardAdmin extends Component {
     );
   }
 
+  // Metodo que redireciona o sistema para a página de edição
   onClickEdit(user){
     this.props.history.push({pathname: '/editUser', state: {usr: user}})
   }
 
+  // Metodo que realiza a exclusão de um usuário
   onClickDelete(id){
     UserService.deleteUser(id).then(response => {
       this.setState({message:response.data,content: this.state.content.filter(user => user.id !== id)})
@@ -47,16 +69,18 @@ export default class BoardAdmin extends Component {
     });
   }
 
+  // Método que redireciona o sistema para a página de criação de um usuário
   onClickCreate(){
     this.props.history.push("/createUser")
   }
 
+  // Método que redireciona o sistema para a página de visualização de um usuário
   onClickVisualize(user){
     this.props.history.push({pathname: '/profile', state: { usr: user}})
   }
 
 
-
+// Método que renderiza o componente na tela
   render() {
     const {content} = this.state
     return (

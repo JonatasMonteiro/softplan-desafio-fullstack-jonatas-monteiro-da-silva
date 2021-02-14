@@ -131,7 +131,7 @@ public class ProcessControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String resultAsString = result.getResponse().getContentAsString();
-        assertTrue(resultAsString.contains("third_title"));
+        assertEquals(resultAsString,"Processo de id 3 criado com sucesso");
     }
 
     @Test
@@ -144,7 +144,7 @@ public class ProcessControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String resultAsString = result.getResponse().getContentAsString();
-        assertEquals(resultAsString,"User of username: finalizador included to opinate into process of id 2 - second_title");
+        assertEquals(resultAsString,"Usuario de username: finalizador incluído a dar parecer no processo 2 - second_title");
     }
 
     @Test
@@ -172,6 +172,6 @@ public class ProcessControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String resultAsString = result.getResponse().getContentAsString();
-        assertEquals(resultAsString,"User of username finalizador opinated on process of id 1 - title");
+        assertEquals(resultAsString,"Usuario de username: finalizador deu seu parecer no processo de id 1 - title");
     }
 }

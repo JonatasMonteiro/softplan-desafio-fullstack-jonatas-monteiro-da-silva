@@ -62,7 +62,7 @@ public class ProcessServiceImpl implements ProcessService {
     public void opinate(long processId,String username,String opinion){
         Process process = findById(processId);
         process.getOpinions().put(username,opinion);
-        process.getUsersToOpinate().removeIf(usrname -> usrname == username);
+        process.getUsersToOpinate().removeIf(usrname -> usrname.equals(username));
     }
 
 }

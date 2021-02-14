@@ -7,8 +7,9 @@ import CheckButton from "react-validation/build/button";
 
 
 import ProcessService from "../services/process.service"
-import UserService from "../services/user.service"
+import AuthService from "../services/auth.service"
 
+// Método que valida se o campo está preenchido
 const required = value => {
     if (!value) {
       return (
@@ -19,7 +20,7 @@ const required = value => {
     }
   };
   
-  
+  // Método que garante que o titulo tem o tamanho correto
   const vtitle = value => {
     if (value.length < 5 || value.length > 20) {
       return (
@@ -30,6 +31,7 @@ const required = value => {
     }
   };
   
+  // Método que valida se a descrição tem o tamanho correto
   const vdescription = value => {
     if (value.length < 30 || value.length > 100) {
       return (
@@ -40,7 +42,7 @@ const required = value => {
     }
   };
 
-
+// Componente da criação de um processo
 export default class CreateUser extends Component{
     constructor(props) {
         super(props);
@@ -59,32 +61,52 @@ export default class CreateUser extends Component{
           message: ""
         };
       }
-      
-
+      // Método do ciclo de vida do componente, que executa o código contido quando o componente
+      // é montado
+      componentDidMount(){
+        const usr = AuthService.getCurrentUser()
+    if(usr){
+      const role = usr.role.substring(5).toLowerCase()
+      if(role !== "triador"){
+        this.props.history.push("/"+role)
+      }
+    }
+    else{
+      this.props.history.push("/login")
+    }
+        ProcessService.getUsersFinalizadores().then(response =>{
+            
+          this.setState({users: response.data.map(user => user.username)})
+      })
+      }
+      // Metodo que cuida da mudança no campo do título do processo
       onChangeTitle(e) {
         this.setState({
           title: e.target.value
         });
       }
-
+      // Método que cuida da mudança no campo de descrição do processo
       onChangeDescription(e){
           this.setState({
               description:e.target.value
           })
       }
     
-    
+    // Método que cuida da mudança no campo de usuario para opinar do processo
       onChangeUserToOpinate(e) {
         this.setState({
           userToOpinate: e.target.value
         });
       }
 
+      // Metodo que redireciona o usuario triador de volta para a sua página ao clickar no botão
+      // Voltar
       onClickReturn(e){
           e.preventDefault()
           this.props.history.push("/triador")
       }
     
+      // Método que cuida da submissão do formulário
       handleCreate(e) {
         e.preventDefault();
     
@@ -103,9 +125,11 @@ export default class CreateUser extends Component{
           ).then(
             response => {
               this.setState({
-                message: response.data.message,
+                message: response.data,
                 successful: true
               });
+              this.props.history.push({pathname:"/triador",state:{message:this.state.message}});
+              window.location.reload();
             },
             error => {
               const resMessage =
@@ -121,16 +145,12 @@ export default class CreateUser extends Component{
               });
             }
           );
-          this.props.history.push("/triador");
-          window.location.reload();
+          
         }
       }
-
+      // Método que renderiza o componente na tela
     render(){
-        ProcessService.getUsersFinalizadores().then(response =>{
-            
-            this.setState({users: response.data.map(user => user.username)})
-        })
+        
         const users = this.state.users;
         return (
             <div className="col-md-12">
@@ -187,7 +207,7 @@ export default class CreateUser extends Component{
                       </div>
       
                       <div className="form-group">
-                        <button className="btn btn-primary btn-block">Criar Usuario</button>
+                        <button className="btn btn-primary btn-block">Criar Processo</button>
                         
                       </div>
                       <button onClick={this.onClickReturn} className="btn btn-primary btn-block">Voltar</button>

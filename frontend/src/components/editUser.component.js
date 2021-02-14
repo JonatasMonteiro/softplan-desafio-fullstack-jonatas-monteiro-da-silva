@@ -3,9 +3,10 @@ import Form from "react-validation/build/form";
 import Input from "react-validation/build/input";
 import CheckButton from "react-validation/build/button";
 
-
+import AuthService from "../services/auth.service"
 import UserService from "../services/user.service"
 
+// Método que garante que os campos estão preenchidos
 const required = value => {
     if (!value) {
       return (
@@ -16,7 +17,7 @@ const required = value => {
     }
   };
   
-  
+  // Método que garante o tamanho correto do username
   const vusername = value => {
     if (value.length < 3 || value.length > 20) {
       return (
@@ -27,6 +28,7 @@ const required = value => {
     }
   };
   
+  // Método que garante o tamanho correto da senha
   const vpassword = value => {
     if (value.length < 6 || value.length > 40) {
       return (
@@ -36,7 +38,7 @@ const required = value => {
       );
     }
   };
-
+// Componente da edição de um usuário
 export default class EditUser extends Component{
     constructor(props) {
         super(props);
@@ -54,25 +56,42 @@ export default class EditUser extends Component{
           message: ""
         };
       }
+      // Método do ciclo de vida do componente, que executa o código contido quando o componente
+      // é montado
+      componentDidMount(){
+        const usr = AuthService.getCurrentUser()
+    if(usr){
+      const role = usr.role.substring(5).toLowerCase()
+      if(role !== "admin"){
+        this.props.history.push("/"+role)
+      }
+    }
+    else{
+      this.props.history.push("/login")
+    }
+      }
 
+      // Método que cuida da mudança de username
       onChangeUsername(e) {
         this.setState({
           username: e.target.value
         });
       }
 
+      // Método que redireciona o usuário admin para sua página após este clickar no botão Voltar
       onClickReturn(e){
         e.preventDefault()
         this.props.history.push("/admin")
     }
     
-    
+    // Método que cuida da mudança de senha
       onChangePassword(e) {
         this.setState({
           password: e.target.value
         });
       }
     
+      // Método que cuida da submissão do formulário
       handleEdit(e) {
         e.preventDefault();
     
@@ -92,9 +111,10 @@ export default class EditUser extends Component{
           ).then(
             response => {
               this.setState({
-                message: response.data.message,
+                message: response.data,
                 successful: true
               });
+              this.props.history.push({pathname:"/admin",state:{message:this.state.message}});
             },
             error => {
               const resMessage =
@@ -110,10 +130,11 @@ export default class EditUser extends Component{
               });
             }
           );
-          this.props.history.push("/admin");
+          
         }
       }
 
+      // Método que renderiza o componente na tela
     render(){
         return (
             <div className="col-md-12">

@@ -35,7 +35,8 @@ public class ProcessController {
     @PreAuthorize("hasRole('TRIADOR')")
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public ResponseEntity<?> createProcess(@RequestBody Process process){
-        return ResponseEntity.ok(processService.create(process));
+        Process processCreated = processService.create(process);
+        return ResponseEntity.ok("Processo de id "+ processCreated.getId() + " criado com sucesso");
     }
 
     // Endpoint onde se determina um usuario para dar o parecer em um determinado processo.
@@ -47,14 +48,14 @@ public class ProcessController {
     public ResponseEntity<?> insertUserToOpinate(@PathVariable("username") String username, @PathVariable("id") long processId){
         Process process = processService.findById(processId);
         if(process == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The process id matches no known process");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("O id não corresponde a nenhum processo conhecido");
         }
         User user = userService.findByUsername(username);
         if(user == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The username matches no known user");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Esse username não corresponde a nenhum usuário");
         }
         processService.includeUserToOpinate(processId,username);
-        return ResponseEntity.ok("User of username: "+ username + " included to opinate into process of id "+ processId+ " - "+ process.getTitle());
+        return ResponseEntity.ok("Usuario de username: "+ username + " incluído a dar parecer no processo "+ processId+ " - "+ process.getTitle());
     }
 
     // Endpoint onde se retornam todos os usuarios finalizadores para possível indicação a dar parecer
@@ -81,7 +82,7 @@ public class ProcessController {
     public ResponseEntity<?> getProcess(@PathVariable("id") long processId){
         Process process = processService.findById(processId);
         if(process == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The process id matches no known process");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("O id não corresponde a nenhum processo conhecido");
         }
         else{
             return ResponseEntity.ok(process);
@@ -100,10 +101,10 @@ public class ProcessController {
         token = token.substring(7);
         String usrname = jwtTokenUtil.getUsernameFromToken(token);
         if(user == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The username matches no known user");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Esse username não corresponde a nenhum usuário");
         }
         if(!username.equals(usrname)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have no authorization to see this user processes");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Você não tem autorização para ver os processos desse usuário");
         }
             return ResponseEntity.ok(processService.getProcessToOpinateFromUser(username));
 
@@ -122,21 +123,21 @@ public class ProcessController {
         String usrname = jwtTokenUtil.getUsernameFromToken(token);
         Process process = processService.findById(processId);
         if(process == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The process id matches no known process");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("O id não corresponde a nenhum processo conhecido");
         }
         User user = userService.findByUsername(username);
         if(user == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The username matches no known user");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Esse username não corresponde a nenhum usuárioo");
         }
         if(!username.equals(usrname)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can't opinate as other user");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Você não pode dar o parecer como outro usuário");
         }
         List<Process> processesFromUser = processService.getProcessToOpinateFromUser(username)
                 .stream().filter(processItem -> processItem.getId() == processId).collect(Collectors.toList());
         if(processesFromUser.isEmpty()){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You're not selected to opinate on this process");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Você não tem parecer a dar nesse processo");
         }
         processService.opinate(processId,username,opinion);
-        return ResponseEntity.ok("User of username "+ username + " opinated on process of id "+ processId + " - "+process.getTitle());
+        return ResponseEntity.ok("Usuario de username: "+ username + " deu seu parecer no processo de id "+ processId + " - "+process.getTitle());
     }
 }

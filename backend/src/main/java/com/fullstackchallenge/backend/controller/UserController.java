@@ -63,7 +63,7 @@ public class UserController {
     public ResponseEntity<?> listUsers(){
         List<User> users = userService.findAll();
         if(users.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("There are no users created yet"); }
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Não há nenhum usuario a ser listado"); }
         else{
             return ResponseEntity.ok(users);
         }
@@ -77,7 +77,7 @@ public class UserController {
     public ResponseEntity<?> getUser(@PathVariable("id") long id){
         User user = userService.findById(id);
         if(user == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This id matches no user");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Esse id não corresponde a nenhum usuario");
         }
         else{
             return ResponseEntity.ok(user);
@@ -93,16 +93,16 @@ public class UserController {
     public ResponseEntity<?> updateUser(@PathVariable("id") long id ,@RequestBody User user){
         User userFromId = userService.findById(id);
         if(userFromId == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This id matches no user");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Esse id não corresponde a nenhum usuario");
         }
         else{
             try {
                 userService.update(user);
             }
             catch (RoleChangeException e){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Changing role of user is forbidden");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Mudar o cargo de um usuario é proibido");
             }
-            return ResponseEntity.ok("User of id "+ id+ " was updated sucessfully");
+            return ResponseEntity.ok("Usuario de id "+ id+ " atualizado com sucesso");
         }
     }
 
@@ -115,11 +115,11 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable("id") long id){
         User userFromId = userService.findById(id);
         if(userFromId == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This id matches no user");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Esse id não corresponde a nenhum usuario");
         }
         else{
             userService.delete(id);
-            return ResponseEntity.ok("User of id "+ id + " was deleted sucessfully");
+            return ResponseEntity.ok("Usuario de id "+ id + " foi deletado com sucesso");
         }
     }
 
@@ -132,9 +132,9 @@ public class UserController {
     public ResponseEntity<?> saveUser(@RequestBody User user) {
         try {
             User userCreated = userService.create(user);
-            return ResponseEntity.ok("User of id "+userCreated.getId()+ " succesfully created");
+            return ResponseEntity.ok("Usuario de id "+userCreated.getId()+ " criado com sucesso");
         } catch (DuplicateUsernameException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("This username already exists: "+ user.getUsername());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Esse nome de usuário ja existe: "+ user.getUsername());
         }
     }
 

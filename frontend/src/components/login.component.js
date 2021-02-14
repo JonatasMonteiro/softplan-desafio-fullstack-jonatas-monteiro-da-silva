@@ -5,6 +5,7 @@ import CheckButton from "react-validation/build/button";
 
 import AuthService from "../services/auth.service";
 
+// Método que cuida para que os campos sejam preenchidos
 const required = value => {
   if (!value) {
     return (
@@ -15,6 +16,7 @@ const required = value => {
   }
 };
 
+//COmponente da página de login
 export default class Login extends Component {
   constructor(props) {
     super(props);
@@ -30,18 +32,32 @@ export default class Login extends Component {
     };
   }
 
+  // Método do ciclo de vida do componente, que executa o código contido quando o componente
+      // é montado
+  componentDidMount(){
+    const usr = AuthService.getCurrentUser()
+    if(usr){
+      const role = usr.role.substring(5).toLowerCase()
+      this.props.history.push("/"+role)
+      
+    }
+  }
+
+  // Método que cuida da mudança de username
   onChangeUsername(e) {
     this.setState({
       username: e.target.value
     });
   }
 
+  // Método que cuida da mudança de senha
   onChangePassword(e) {
     this.setState({
       password: e.target.value
     });
   }
 
+  // Método que cuida da submissão do formulário
   handleLogin(e) {
     e.preventDefault();
 
@@ -64,6 +80,9 @@ export default class Login extends Component {
             this.props.history.push("/admin"); }
            else if( user.role === "ROLE_TRIADOR"){
              this.props.history.push("/triador")
+           }
+           else if(user.role === "ROLE_FINALIZADOR"){
+             this.props.history.push("/finalizador")
            }
           window.location.reload(); 
         },
@@ -88,6 +107,7 @@ export default class Login extends Component {
     }
   }
 
+  // Método que renderiza o componente na tela
   render() {
     return (
       <div className="col-md-12">
